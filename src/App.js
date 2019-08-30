@@ -12,7 +12,7 @@ const axiosGithubGraphQL = axios.create({
 
 const GET_ORGANIZATION = `
   {
-    organization(login: 'the-road-to-learn-react') {
+    organization(login: "the-road-to-learn-react") {
       name,
       url
     }
@@ -25,9 +25,6 @@ class App extends Component {
   };
 
   componentDidMount() {
-    console.log(
-      `process.env.REACT_APP_GITHUB_PERSONAL_ACCESS_TOKEN : ${process.env.REACT_APP_GITHUB_PERSONAL_ACCESS_TOKEN}`
-    );
     this.onFetchFromGithub();
   }
 
@@ -41,7 +38,7 @@ class App extends Component {
   };
 
   onFetchFromGithub = () => {
-    axiosGithubGraphQL.post('', { query: GET_ORGANIZATION }).then(result => console.log(result));
+    axiosGithubGraphQL.post('', { query: GET_ORGANIZATION }).then(result => console.log(result.data));
   };
 
   render() {
