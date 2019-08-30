@@ -4,6 +4,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### create .env file
+
+create .env file at root directory of the project and add following variable with you github token
+REACT_APP_GITHUB_PERSONAL_ACCESS_TOKEN={your github token here...}
+
 ### `npm start`
 
 Runs the app in the development mode.<br>
