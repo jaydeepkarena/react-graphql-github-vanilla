@@ -4,7 +4,7 @@ import Organization from './Organization';
 
 const TITLE = 'React GraphQL GitHub Client';
 
-const axiosGithubGraphQL = axios.create({
+const axiosGitHubGraphQL = axios.create({
   baseURL: 'https://api.github.com/graphql',
   headers: {
     Authorization: `bearer ${process.env.REACT_APP_GITHUB_PERSONAL_ACCESS_TOKEN}`
@@ -34,11 +34,11 @@ const GET_REPOSITORY_OF_ORGANIZATION = `
 `;
 
 const GET_ISSUES_OF_REPOSITORY = `
-{
-  organization(login: "the-road-to-learn-react") {
+query ($organization: String!, $repository: String!) {
+  organization(login: $organization) {
     name
     url
-    repository(name: "the-road-to-learn-react") {
+    repository(name: $repository) {
       name
       url
       issues(last: 5) {
@@ -55,6 +55,39 @@ const GET_ISSUES_OF_REPOSITORY = `
 }
 `;
 
+const getIssuesOfRepositoryQuery = (organization, repository) => `
+{
+  organization(login: "${organization}") {
+    name
+    url
+    repository(name: "${repository}") {
+      name
+      url
+      issues(last: 5) {
+        edges {
+          node {
+            id
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const getIssuesOfRepository = path => {
+  const [organization, repository] = path.split('/');
+  return axiosGitHubGraphQL.post('', {
+    query: getIssuesOfRepositoryQuery(organization, repository)
+  });
+};
+
+const resolveIssuesQuery = queryResult => () => ({
+  organization: queryResult.data.data.organization,
+  errors: queryResult.data.errors
+});
 
 class App extends Component {
   state = {
@@ -64,7 +97,7 @@ class App extends Component {
   };
 
   componentDidMount() {
-    this.onFetchFromGithub();
+    this.onFetchFromGithub(this.state.path);
   }
 
   onChange = event => {
@@ -72,16 +105,13 @@ class App extends Component {
   };
 
   onSubmit = event => {
-    // fetch data
+    this.onFetchFromGithub(this.state.path);
+
     event.preventDefault();
   };
 
-  onFetchFromGithub = () => {
-    axiosGithubGraphQL
-      .post('', { query: GET_ISSUES_OF_REPOSITORY })
-      .then(({ data: { data: { organization }, errors } }) =>
-        this.setState({ organization: organization, error: errors }, () => console.log(this.state))
-      );
+  onFetchFromGithub = path => {
+    getIssuesOfRepository(path).then(queryResult => this.setState(resolveIssuesQuery(queryResult)));
   };
 
   render() {
